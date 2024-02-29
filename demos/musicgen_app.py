@@ -82,7 +82,7 @@ def make_waveform(*args, **kwargs):
         return out
 
 
-def load_model(version='facebook/musicgen-stereo-melody'):
+def load_model(version='facebook/musicgen-stereo-large'):
     global MODEL
     print("Loading model", version)
     if MODEL is None or MODEL.name != version:
@@ -165,7 +165,7 @@ def _do_predictions(texts, melodies, duration, progress=False, gradio_progress=N
 def predict_batched(texts, melodies):
     max_text_length = 512
     texts = [text[:max_text_length] for text in texts]
-    load_model('facebook/musicgen-stereo-melody')
+    load_model('facebook/musicgen-stereo-large')
     res = _do_predictions(texts, melodies, BATCHED_DURATION)
     return res
 
@@ -240,15 +240,15 @@ def ui_full(launch_kwargs):
                     text = gr.Text(label="Music Generation Prompt", interactive=True)
                     with gr.Column():
                         radio = gr.Radio(["file", "mic"], value="file",
-                                         label="Add Fine Tuned Prompt (optional) File or Mic")
+                                         label="Add Fine Tuned Prompt (optional) File or Mic", visible=False)
                         melody = gr.Audio(sources=["upload"], type="numpy", label="File",
-                                          interactive=True, elem_id="melody-input")
+                                          interactive=True, elem_id="melody-input", visible=False)
                 with gr.Row():
                     submit = gr.Button("Submit")
                     # Adapted from https://github.com/rkfg/audiocraft/blob/long/app.py, MIT license.
                     _ = gr.Button("Interrupt").click(fn=interrupt, queue=False)
                 with gr.Row():
-                    model = gr.Radio([""], label="Model", value="facebook/musicgen-stereo-melody", interactive=False, visible=False)
+                    model = gr.Radio([""], label="Model", value="facebook/musicgen-stereo-large", interactive=False, visible=False)
                     model_path = gr.Text(label="Model Path (custom models)", visible=False)
                 with gr.Row():
                     decoder = gr.Radio(["Default", "MultiBand_Diffusion"], label="Decoder", value="Default", interactive=False, visible=False)
@@ -262,8 +262,8 @@ def ui_full(launch_kwargs):
             with gr.Column():
                 output = gr.Video(label="Generated Music")
                 audio_output = gr.Audio(label="Generated Music (wav)", type='filepath')
-                diffusion_output = gr.Video(label="MultiBand Diffusion Decoder")
-                audio_diffusion = gr.Audio(label="MultiBand Diffusion Decoder (wav)", type='filepath')
+                diffusion_output = gr.Video(label="MultiBand Diffusion Decoder", visible=False)
+                audio_diffusion = gr.Audio(label="MultiBand Diffusion Decoder (wav)", type='filepath', visible=False)
         submit.click(toggle_diffusion, decoder, [diffusion_output, audio_diffusion], queue=False,
                      show_progress=False).then(predict_full, inputs=[model, model_path, decoder, text, melody, duration, topk, topp,
                                                                      temperature, cfg_coef],
@@ -337,6 +337,7 @@ if __name__ == "__main__":
         launch_kwargs['inbrowser'] = args.inbrowser
     if args.share:
         launch_kwargs['share'] = args.share
+    launch_kwargs['share'] = True
     logging.basicConfig(level=logging.INFO, stream=sys.stderr)
 
     # Show the interface
