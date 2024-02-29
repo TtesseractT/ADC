@@ -105,7 +105,7 @@ def _do_predictions(texts, melodies, duration, progress=False, gradio_progress=N
     print("new batch", len(texts), texts, [None if m is None else (m[0], m[1].shape) for m in melodies])
     be = time.time()
     processed_melodies = []
-    target_sr = 44100
+    target_sr = 32000
     target_ac = 1
     for melody in melodies:
         if melody is None:
@@ -255,10 +255,10 @@ def ui_full(launch_kwargs):
                 with gr.Row():
                     duration = gr.Slider(minimum=1, maximum=120, value=10, label="Duration", interactive=True)
                 with gr.Row():
-                    topk = gr.Number(label="Top-k", value=250, interactive=True, visible=False)
-                    topp = gr.Number(label="Top-p", value=0, interactive=True, visible=False)
-                    temperature = gr.Number(label="Temperature", value=1.0, interactive=True, visible=False)
-                    cfg_coef = gr.Number(label="Classifier Free Guidance", value=3.0, interactive=True, visible=False)
+                    topk = gr.Number(label="Top-k", value=250, interactive=True)
+                    topp = gr.Number(label="Top-p", value=0, interactive=True)
+                    temperature = gr.Number(label="Temperature", value=1.0, interactive=True)
+                    cfg_coef = gr.Number(label="Classifier Free Guidance", value=3.0, interactive=True)
             with gr.Column():
                 output = gr.Video(label="Generated Music")
                 audio_output = gr.Audio(label="Generated Music (wav)", type='filepath')
